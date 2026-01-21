@@ -1,0 +1,104 @@
+# --- configs/openssl.cnf ---
+
+[ ca ]
+default_ca = CA_intermediate
+
+# --- ROOT CA CONFIG ---
+[ CA_root ]
+dir               = ./01_root-ca
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/db/index.txt
+serial            = $dir/db/serial
+RANDFILE          = $dir/private/.rand
+private_key       = $dir/private/root.key
+certificate       = $dir/certs/root.crt
+default_md        = sha256
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 3650
+preserve          = no
+policy            = policy_strict
+
+# --- INTERMEDIATE CA CONFIG ---
+[ CA_intermediate ]
+dir               = ./02_intermediate-ca
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/db/index.txt
+serial            = $dir/db/serial
+RANDFILE          = $dir/private/.rand
+private_key       = $dir/private/intermediate.key
+certificate       = $dir/certs/intermediate.crt
+default_md        = sha256
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 375
+preserve          = no
+policy            = policy_loose
+copy_extensions   = copy
+
+# --- POLICIES ---
+[ policy_strict ]
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ policy_loose ]
+countryName             = optional
+stateOrProvinceName     = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+# --- REQ ---
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_ca
+
+[ req_distinguished_name ]
+countryName                     = Country Name (2 letter code)
+stateOrProvinceName             = State or Province Name
+localityName                    = Locality Name
+0.organizationName              = Organization Name
+organizationalUnitName          = Organizational Unit Name
+commonName                      = Common Name
+emailAddress                    = Email Address
+
+# --- EXTENSIONS ---
+[ v3_root_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ v3_intermediate_ca ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ server_cert ]
+basicConstraints = CA:FALSE
+nsCertType = server
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+[ usr_cert ]
+basicConstraints = CA:FALSE
+nsCertType = client, email
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, emailProtection
