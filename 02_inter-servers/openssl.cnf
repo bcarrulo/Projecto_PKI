@@ -1,0 +1,74 @@
+[ default ]
+name            = inter-servers-ca
+domain_suffix   = grupo6.local
+aia_url         = http://$name.$domain_suffix/$name.crt
+crl_url         = http://$name.$domain_suffix/$name.crl
+default_ca      = CA_default
+name_opt        = ca_default
+cert_opt        = ca_default
+
+[ CA_default ]
+dir             = .
+certs           = $dir/certs
+crl_dir         = $dir/crl
+new_certs_dir   = $dir/newcerts
+database        = $dir/db/index.txt
+serial          = $dir/db/serial
+rand_serial     = yes
+
+# Chaves DESTA Intermédia
+private_key     = $dir/private/inter-servers.key
+certificate     = $dir/certs/inter-servers.crt
+
+default_days    = 375       # 1 Ano para certificados de servidores
+default_crl_days= 30
+default_md      = sha256
+preserve        = no
+policy          = policy_loose
+
+[ policy_loose ]
+# Política mais relaxada para servidores (não precisa de coincidir tudo)
+countryName             = optional
+stateOrProvinceName     = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 4096
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_intermediate_ca
+
+[ req_distinguished_name ]
+# (Igual à Root, podes copiar se quiseres, ou deixar abreviado)
+countryName                     = Country Name (2 letter code)
+stateOrProvinceName             = State or Province Name
+organizationName                = Organization Name
+organizationalUnitName          = Organizational Unit Name
+commonName                      = Common Name
+emailAddress                    = Email Address
+
+countryName_default             = PT
+stateOrProvinceName_default     = Porto
+organizationName_default        = ISEP
+organizationalUnitName_default  = IT Dept
+commonName_default              = Grupo6 Servers CA
+emailAddress_default            = admin@grupo6.com
+
+[ v3_intermediate_ca ]
+# Extensões para o pedido DESTA CA (que vai para a Root)
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ server_cert ]
+# Extensões para quando ESTA CA assinar o NGINX
+basicConstraints = CA:FALSE
+nsCertType = server
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+authorityKeyIdentifier = keyid,issuer

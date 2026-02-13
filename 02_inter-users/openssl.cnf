@@ -1,0 +1,17 @@
+[ CA_default ]
+# ...
+private_key     = $dir/private/inter-users.key   
+certificate     = $dir/certs/inter-users.crt     
+
+[ req_distinguished_name ]
+# ...
+organizationalUnitName_default  = HR Dept          
+commonName_default              = Grupo6 Users CA  
+
+[ usr_cert ]
+# Extensões para quando ESTA CA assinar PESSOAS
+basicConstraints = CA:FALSE
+nsCertType = client, email
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, emailProtection
+authorityKeyIdentifier = keyid,issuer

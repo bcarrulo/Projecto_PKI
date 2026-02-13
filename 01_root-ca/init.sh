@@ -25,15 +25,16 @@ openssl genrsa -aes256 -out private/root.key 4096
 # 5. Gerar o Certificado Auto-Assinado (Self-Signed)
 # -config openssl.cnf: Usa a configuração local desta pasta
 # -extensions v3_ca: Aplica as regras de Root CA (CA:TRUE)
-# -days 3650: Validade de 10 anos
+# -days 7300: Validade de 20 anos
 echo "[4/4] A criar Certificado Root (Responde às perguntas)..."
 echo "IMPORTANTE: Em 'Common Name', escreve: Grupo6 Root CA"
 openssl req -config openssl.cnf \
       -key private/root.key \
-      -new -x509 -days 3650 -sha256 -extensions v3_ca \
+      -new -x509 -days 7300 -sha256 -extensions v3_ca \
       -out certs/root.crt
+      
 
 # 6. Verificação Final
 echo "--- CONCLUÍDO ---"
 echo "Verifica os detalhes abaixo:"
-openssl x509 -noout -text -in certs/root.crt | grep -E "Issuer:|Subject:|CA:"
+openssl x509 -noout -text -in certs/root.crt | grep -E 'Subject:|Issuer:|Not Before:|Not After :|Public Key Algorithm:|RSA Public-Key:'
