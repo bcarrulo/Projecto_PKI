@@ -1,0 +1,77 @@
+# --- CONFIGURAÇÃO DA ROOT CA (GRUPO 6) ---
+[ default ]
+name            = root-ca
+domain_suffix   = grupo6.local
+aia_url         = http://$name.$domain_suffix/$name.crt
+crl_url         = http://$name.$domain_suffix/$name.crl
+default_ca      = CA_default
+name_opt        = ca_default
+cert_opt        = ca_default
+
+[ CA_default ]
+# Esta diretoria é RELATIVA à pasta onde corres o comando
+dir             = .
+certs           = $dir/certs
+crl_dir         = $dir/crl
+new_certs_dir   = $dir/newcerts
+database        = $dir/db/index.txt
+serial          = $dir/db/serial
+rand_serial     = yes
+
+# As chaves e certificados da própria Root
+private_key     = $dir/private/root.key
+certificate     = $dir/certs/root.crt
+
+# Regras de segurança
+default_days    = 3650      # 10 Anos para a Root
+default_crl_days= 30
+default_md      = sha256
+preserve        = no
+policy          = policy_strict
+
+[ policy_strict ]
+# A Root é rigorosa: Só assina se o país e organização forem iguais
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 4096
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_ca
+
+[ req_distinguished_name ]
+countryName                     = Country Name (2 letter code)
+stateOrProvinceName             = State or Province Name
+localityName                    = Locality Name
+0.organizationName              = Organization Name
+organizationalUnitName          = Organizational Unit Name
+commonName                      = Common Name
+emailAddress                    = Email Address
+
+# Valores por defeito para poupar tempo
+countryName_default             = PT
+stateOrProvinceName_default     = Porto
+localityName_default            = Paranhos
+0.organizationName_default      = ISEP
+organizationalUnitName_default  = Informatica
+emailAddress_default            = admin@grupo6.com
+
+[ v3_ca ]
+# Extensões para uma ROOT CA (Crítico: CA:TRUE)
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+
+[ v3_intermediate_ca ]
+# Extensões que a Root usa quando assina as Intermédias
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign

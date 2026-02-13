@@ -1,0 +1,39 @@
+#!/bin/bash
+# Script de Inicialização da ROOT CA
+# Grupo 6 - SEPDD
+
+# 1. Parar se houver erros
+set -e
+
+echo "--- A INICIAR CONFIGURAÇÃO DA ROOT CA ---"
+
+echo "[1/4] A criar diretorias..."
+mkdir -p certs crl newcerts private db csr
+
+# 3. Inicializar Base de Dados (Flat File Database)
+echo "[2/4] A criar base de dados do OpenSSL..."
+touch db/index.txt
+if [ ! -f db/serial ]; then
+    echo 1000 > db/serial
+fi
+
+# 4. Gerar a Chave Privada da Root (4096 bits)
+# -aes256: Protege a chave com palavra-passe
+echo "[3/4] A gerar Chave Privada (Define uma password forte!)..."
+openssl genrsa -aes256 -out private/root.key 4096
+
+# 5. Gerar o Certificado Auto-Assinado (Self-Signed)
+# -config openssl.cnf: Usa a configuração local desta pasta
+# -extensions v3_ca: Aplica as regras de Root CA (CA:TRUE)
+# -days 3650: Validade de 10 anos
+echo "[4/4] A criar Certificado Root (Responde às perguntas)..."
+echo "IMPORTANTE: Em 'Common Name', escreve: Grupo6 Root CA"
+openssl req -config openssl.cnf \
+      -key private/root.key \
+      -new -x509 -days 3650 -sha256 -extensions v3_ca \
+      -out certs/root.crt
+
+# 6. Verificação Final
+echo "--- CONCLUÍDO ---"
+echo "Verifica os detalhes abaixo:"
+openssl x509 -noout -text -in certs/root.crt | grep -E "Issuer:|Subject:|CA:"

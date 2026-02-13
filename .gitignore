@@ -6,11 +6,6 @@
 *.p12
 *.pfx
 
-# Ignorar as pastas de trabalho da PKI (elas serão criadas na VM)
-01_root-ca/
-02_intermediate-ca/
-03_server/
-04_clients/
 
 # Manter apenas ficheiros de documentação e scripts
 !README.md
