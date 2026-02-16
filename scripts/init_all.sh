@@ -67,12 +67,15 @@ chmod 700 "$ROOT_DIR/02_inter-servers/private"
 
 echo "--- [2/4] A criar Root CA ---"
 ( cd "$ROOT_DIR/01_root-ca" && ./init.sh )
+echo "--- OK: Root CA pronta ---"
 
 echo "--- [3/4] A criar Inter-Users CA ---"
 ( cd "$ROOT_DIR/02_inter-users" && ./init.sh )
+echo "--- OK: Inter-Users CA pronta ---"
 
 echo "--- [4/4] A criar Inter-Servers CA ---"
 ( cd "$ROOT_DIR/02_inter-servers" && ./init.sh )
+echo "--- OK: Inter-Servers CA pronta ---"
 
 echo "--- A validar PKI ---"
 missing=0

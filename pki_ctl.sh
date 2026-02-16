@@ -92,20 +92,44 @@ health_check() {
 }
 
 list_issued() {
-    echo "--- Issued Certificates ---"
-    if [ -f "$ROOT_DIR/02_inter-users/db/index.txt" ]; then
-        echo "Users (02_inter-users/db/index.txt):"
-        grep -v '^#' "$ROOT_DIR/02_inter-users/db/index.txt" || true
-    else
-        echo "Users index missing"
-    fi
+    echo "--- Issued Certificates (Valid) ---"
+    format_index "$ROOT_DIR/02_inter-users/db/index.txt" "Users"
     echo
-    if [ -f "$ROOT_DIR/02_inter-servers/db/index.txt" ]; then
-        echo "Servers (02_inter-servers/db/index.txt):"
-        grep -v '^#' "$ROOT_DIR/02_inter-servers/db/index.txt" || true
-    else
-        echo "Servers index missing"
+    format_index "$ROOT_DIR/02_inter-servers/db/index.txt" "Servers"
+}
+
+list_revoked() {
+    echo "--- Revoked Certificates ---"
+    format_index "$ROOT_DIR/02_inter-users/db/index.txt" "Users" "R"
+    echo
+    format_index "$ROOT_DIR/02_inter-servers/db/index.txt" "Servers" "R"
+}
+
+format_index() {
+    local file="$1"
+    local label="$2"
+    local filter_status="$3"
+
+    if [ ! -f "$file" ]; then
+        echo "$label: index missing"
+        return
     fi
+
+    echo "$label:"
+    awk -v status="$filter_status" '
+        BEGIN {
+            printf "%-6s %-14s %-14s %-12s %s\n", "Status", "ValidUntil", "Revoked", "Serial", "Subject"
+        }
+        $0 !~ /^#/ {
+            if (status != "" && $1 != status) next
+            if (status == "" && $1 != "V") next
+            revoked = ($3 == "" ? "-" : $3)
+            serial = $4
+            subject = $6
+            for (i = 7; i <= NF; i++) subject = subject " " $i
+            printf "%-6s %-14s %-14s %-12s %s\n", $1, $2, revoked, serial, subject
+        }
+    ' "$file"
 }
 
 init_all() {
@@ -145,11 +169,12 @@ show_menu() {
     echo "2) Status"
     echo "3) Health check"
     echo "4) List issued certs"
-    echo "5) Create user cert"
-    echo "6) Create server cert"
-    echo "7) Revoke user cert"
-    echo "8) Revoke server cert"
-    echo "9) Exit"
+    echo "5) List revoked certs"
+    echo "6) Create user cert"
+    echo "7) Create server cert"
+    echo "8) Revoke user cert"
+    echo "9) Revoke server cert"
+    echo "10) Exit"
     echo
 }
 
@@ -162,11 +187,12 @@ while true; do
         2) show_status; pause ;;
         3) health_check; pause ;;
         4) list_issued; pause ;;
-        5) create_user; pause ;;
-        6) create_server; pause ;;
-        7) revoke_user; pause ;;
-        8) revoke_server; pause ;;
-        9) exit 0 ;;
+        5) list_revoked; pause ;;
+        6) create_user; pause ;;
+        7) create_server; pause ;;
+        8) revoke_user; pause ;;
+        9) revoke_server; pause ;;
+        10) exit 0 ;;
         *) echo "Invalid option."; pause ;;
     esac
 done

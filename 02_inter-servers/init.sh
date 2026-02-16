@@ -15,17 +15,20 @@ touch db/index.txt
 
 # 2. Gerar Chave Privada
 echo "[1/3] A gerar Chave Privada..."
+echo "Vai ser pedida a password da chave da Inter-Servers CA."
 openssl genrsa -aes256 -out private/inter-servers.key 4096
 
 # 3. Gerar Pedido (CSR)
 echo "[2/3] A gerar o Pedido (CSR)..."
 # IMPORTANTE: Common Name deve ser "Grupo6 Servers CA"
+echo "Vai ser pedida a password da chave da Inter-Servers CA."
 openssl req -config openssl.cnf -new -sha256 \
     -key private/inter-servers.key \
     -out csr/inter-servers.csr
 
 # 4. A ROOT CA ASSINA (Simulação do envio para a Root)
 echo "[3/3] A pedir à ROOT CA para assinar..."
+echo "Vai ser pedida a password da chave da Root CA."
 cd ../01_root-ca
 openssl ca -config openssl.cnf -extensions v3_intermediate_ca \
     -days 3650 -notext -md sha256 \
