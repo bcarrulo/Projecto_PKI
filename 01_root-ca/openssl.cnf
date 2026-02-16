@@ -16,6 +16,7 @@ crl_dir         = $dir/crl
 new_certs_dir   = $dir/newcerts
 database        = $dir/db/index.txt
 serial          = $dir/db/serial
+crlnumber       = $dir/db/crlnumber
 rand_serial     = yes
 
 # As chaves e certificados da própria Root

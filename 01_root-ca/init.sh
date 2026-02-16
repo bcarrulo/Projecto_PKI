@@ -7,6 +7,11 @@ set -e
 
 echo "--- A INICIAR CONFIGURAÇÃO DA ROOT CA ---"
 
+if [ -f certs/root.crt ] && [ -f private/root.key ]; then
+    echo "Root CA ja existe. A saltar criacao."
+    exit 0
+fi
+
 echo "[1/4] A criar diretorias..."
 mkdir -p certs crl newcerts private db csr
 
@@ -15,6 +20,9 @@ echo "[2/4] A criar base de dados do OpenSSL..."
 touch db/index.txt
 if [ ! -f db/serial ]; then
     echo 1000 > db/serial
+fi
+if [ ! -f db/crlnumber ]; then
+    echo 1000 > db/crlnumber
 fi
 
 # 4. Gerar a Chave Privada da Root (4096 bits)

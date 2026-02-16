@@ -2,10 +2,16 @@
 set -e
 echo "--- A INICIAR INTERMEDIATE CA: SERVERS ---"
 
+if [ -f certs/inter-servers.crt ] && [ -f private/inter-servers.key ]; then
+    echo "Inter-Servers CA ja existe. A saltar criacao."
+    exit 0
+fi
+
 # 1. Criar Estrutura
 mkdir -p certs crl newcerts private db csr
 touch db/index.txt
 [ ! -f db/serial ] && echo 1000 > db/serial
+[ ! -f db/crlnumber ] && echo 1000 > db/crlnumber
 
 # 2. Gerar Chave Privada
 echo "[1/3] A gerar Chave Privada..."

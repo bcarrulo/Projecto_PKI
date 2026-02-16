@@ -2,9 +2,15 @@
 set -e
 echo "--- A INICIAR INTERMEDIATE CA: USERS ---"
 
+if [ -f certs/inter-users.crt ] && [ -f private/inter-users.key ]; then
+    echo "Inter-Users CA ja existe. A saltar criacao."
+    exit 0
+fi
+
 mkdir -p certs crl newcerts private db csr
 touch db/index.txt
 [ ! -f db/serial ] && echo 1000 > db/serial
+[ ! -f db/crlnumber ] && echo 1000 > db/crlnumber
 
 echo "[1/3] A gerar Chave Privada..."
 openssl genrsa -aes256 -out private/inter-users.key 4096
