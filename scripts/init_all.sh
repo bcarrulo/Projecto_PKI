@@ -32,6 +32,16 @@ if [ ! -f "$ROOT_DIR/02_inter-servers/init.sh" ]; then
     exit 1
 fi
 
+ensure_exec() {
+    if [ ! -x "$1" ]; then
+        chmod +x "$1" 2>/dev/null || true
+    fi
+}
+
+ensure_exec "$ROOT_DIR/01_root-ca/init.sh"
+ensure_exec "$ROOT_DIR/02_inter-users/init.sh"
+ensure_exec "$ROOT_DIR/02_inter-servers/init.sh"
+
 echo "--- [1/4] A preparar estrutura ---"
 mkdir -p "$ROOT_DIR/01_root-ca"/{private,certs,newcerts,crl,db}
 mkdir -p "$ROOT_DIR/02_inter-users"/{private,certs,newcerts,crl,csr,db}

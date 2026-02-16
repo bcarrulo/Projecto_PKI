@@ -12,6 +12,14 @@ require_exec() {
     fi
 }
 
+ensure_scripts_exec() {
+    require_exec "$SCRIPT_DIR/init_all.sh"
+    require_exec "$SCRIPT_DIR/create_user.sh"
+    require_exec "$SCRIPT_DIR/create_server.sh"
+    require_exec "$SCRIPT_DIR/revoke_user.sh"
+    require_exec "$SCRIPT_DIR/revoke_server.sh"
+}
+
 pause() {
     echo
     read -r -p "Press Enter to continue..."
@@ -146,6 +154,7 @@ show_menu() {
 }
 
 while true; do
+    ensure_scripts_exec
     show_menu
     read -r -p "Select an option: " CHOICE
     case "$CHOICE" in
