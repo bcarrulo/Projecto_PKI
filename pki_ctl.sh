@@ -126,12 +126,12 @@ format_index() {
             if (status != "" && $1 != status) next
             if (status == "" && $1 != "V") next
             if ($1 == "R") {
-                exp = $2
+                valid_until = $2
                 revoked = $3
                 serial = $4
                 start = 6
             } else {
-                exp = $2
+                valid_until = $2
                 revoked = "-"
                 serial = $3
                 start = 5
@@ -148,7 +148,7 @@ format_index() {
                 if (parts[i] ~ /^emailAddress=/) email = substr(parts[i], 14)
             }
 
-            printf "| %-6s | %-14s | %-14s | %-12s | %-20s | %s\n", $1, exp, revoked, serial, cn, email
+            printf "| %-6s | %-14s | %-14s | %-12s | %-20s | %s\n", $1, valid_until, revoked, serial, cn, email
             count++
         }
         END {
