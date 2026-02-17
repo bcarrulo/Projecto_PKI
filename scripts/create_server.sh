@@ -22,7 +22,8 @@ openssl genrsa -out "$SERVER_DIR/${DOMAIN}.key" 2048
 
 echo "2. A gerar CSR..."
 openssl req -new -key "$SERVER_DIR/${DOMAIN}.key" -out "$SERVER_DIR/${DOMAIN}.csr" \
-    -subj "/C=PT/ST=Porto/O=ISEP/OU=IT_Dept/CN=${DOMAIN}"
+    -subj "/C=PT/ST=Porto/O=ISEP/OU=IT_Dept/CN=${DOMAIN}" \
+    -addext "subjectAltName=DNS:${DOMAIN}"
 
 echo "3. A Inter-Servers CA vai assinar..."
 pushd "$ROOT_DIR/02_inter-servers" >/dev/null

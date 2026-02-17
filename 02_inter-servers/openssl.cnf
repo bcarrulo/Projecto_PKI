@@ -16,6 +16,7 @@ database        = $dir/db/index.txt
 serial          = $dir/db/serial
 crlnumber       = $dir/db/crlnumber
 rand_serial     = yes
+copy_extensions = copy
 
 # Chaves DESTA Intermédia
 private_key     = $dir/private/inter-servers.key

@@ -18,6 +18,8 @@ ensure_scripts_exec() {
     require_exec "$SCRIPT_DIR/create_server.sh"
     require_exec "$SCRIPT_DIR/revoke_user.sh"
     require_exec "$SCRIPT_DIR/revoke_server.sh"
+    require_exec "$SCRIPT_DIR/publish_user_sftp.sh"
+    require_exec "$SCRIPT_DIR/publish_server_sftp.sh"
 }
 
 pause() {
@@ -118,16 +120,39 @@ format_index() {
     echo "$label:"
     awk -v status="$filter_status" '
         BEGIN {
-            printf "%-6s %-14s %-14s %-12s %s\n", "Status", "ValidUntil", "Revoked", "Serial", "Subject"
+            printf "| %-6s | %-14s | %-14s | %-12s | %-20s | %s\n", "Status", "ValidUntil", "Revoked", "Serial", "CN", "Email"
         }
         $0 !~ /^#/ {
             if (status != "" && $1 != status) next
             if (status == "" && $1 != "V") next
-            revoked = ($3 == "" ? "-" : $3)
-            serial = $4
-            subject = $6
-            for (i = 7; i <= NF; i++) subject = subject " " $i
-            printf "%-6s %-14s %-14s %-12s %s\n", $1, $2, revoked, serial, subject
+            if ($1 == "R") {
+                exp = $2
+                revoked = $3
+                serial = $4
+                start = 6
+            } else {
+                exp = $2
+                revoked = "-"
+                serial = $3
+                start = 5
+            }
+
+            subject = ""
+            for (i = start; i <= NF; i++) subject = subject (i == start ? "" : " ") $i
+
+            cn = "-"
+            email = "-"
+            n = split(subject, parts, "/")
+            for (i = 1; i <= n; i++) {
+                if (parts[i] ~ /^CN=/) cn = substr(parts[i], 4)
+                if (parts[i] ~ /^emailAddress=/) email = substr(parts[i], 14)
+            }
+
+            printf "| %-6s | %-14s | %-14s | %-12s | %-20s | %s\n", $1, exp, revoked, serial, cn, email
+            count++
+        }
+        END {
+            if (count == 0) print "(no entries)"
         }
     ' "$file"
 }
@@ -162,19 +187,34 @@ revoke_server() {
     "$SCRIPT_DIR/revoke_server.sh" "$DOMAIN"
 }
 
+publish_user() {
+    read -r -p "User name to publish: " NAME
+    require_exec "$SCRIPT_DIR/publish_user_sftp.sh"
+    "$SCRIPT_DIR/publish_user_sftp.sh" "$NAME"
+}
+
+publish_server() {
+    read -r -p "Server domain to publish: " DOMAIN
+    require_exec "$SCRIPT_DIR/publish_server_sftp.sh"
+    "$SCRIPT_DIR/publish_server_sftp.sh" "$DOMAIN"
+}
+
 show_menu() {
     echo
     echo "PKI Control Panel"
-    echo "1) Init all PKI"
-    echo "2) Status"
-    echo "3) Health check"
-    echo "4) List issued certs"
-    echo "5) List revoked certs"
-    echo "6) Create user cert"
-    echo "7) Create server cert"
-    echo "8) Revoke user cert"
-    echo "9) Revoke server cert"
-    echo "10) Exit"
+    echo "1) Audit (Status + Health)"
+    echo "2) Init all PKI"
+    echo "3) Status"
+    echo "4) Health check"
+    echo "5) List issued certs"
+    echo "6) List revoked certs"
+    echo "7) Create user cert"
+    echo "8) Create server cert"
+    echo "9) Revoke user cert"
+    echo "10) Revoke server cert"
+    echo "11) Publish user cert (SFTP)"
+    echo "12) Publish server cert (SFTP)"
+    echo "13) Exit"
     echo
 }
 
@@ -183,16 +223,19 @@ while true; do
     show_menu
     read -r -p "Select an option: " CHOICE
     case "$CHOICE" in
-        1) init_all; pause ;;
-        2) show_status; pause ;;
-        3) health_check; pause ;;
-        4) list_issued; pause ;;
-        5) list_revoked; pause ;;
-        6) create_user; pause ;;
-        7) create_server; pause ;;
-        8) revoke_user; pause ;;
-        9) revoke_server; pause ;;
-        10) exit 0 ;;
+        1) show_status; health_check; pause ;;
+        2) init_all; pause ;;
+        3) show_status; pause ;;
+        4) health_check; pause ;;
+        5) list_issued; pause ;;
+        6) list_revoked; pause ;;
+        7) create_user; pause ;;
+        8) create_server; pause ;;
+        9) revoke_user; pause ;;
+        10) revoke_server; pause ;;
+        11) publish_user; pause ;;
+        12) publish_server; pause ;;
+        13) exit 0 ;;
         *) echo "Invalid option."; pause ;;
     esac
 done
