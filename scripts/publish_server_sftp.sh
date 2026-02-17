@@ -16,9 +16,15 @@ DOMAIN="$1"
 SERVER_DIR="$ROOT_DIR/03_server_certs/$DOMAIN"
 SERVER_KEY="$SERVER_DIR/${DOMAIN}.key"
 SERVER_CHAIN="$SERVER_DIR/fullchain.crt"
+ROOT_CRT="$ROOT_DIR/01_root-ca/certs/root.crt"
 
 if [ ! -f "$SERVER_KEY" ] || [ ! -f "$SERVER_CHAIN" ]; then
     echo "Erro: ficheiros do server nao encontrados em $SERVER_DIR"
+    exit 1
+fi
+
+if [ ! -f "$ROOT_CRT" ]; then
+    echo "Erro: root.crt nao encontrado em $ROOT_CRT"
     exit 1
 fi
 
@@ -42,6 +48,7 @@ fi
 $SUDO mkdir -p "$PICKUP_PATH"
 $SUDO cp "$SERVER_KEY" "$PICKUP_PATH/"
 $SUDO cp "$SERVER_CHAIN" "$PICKUP_PATH/"
+$SUDO cp "$ROOT_CRT" "$PICKUP_PATH/"
 $SUDO chown -R "$SFTP_USER":"$SFTP_USER" "$PICKUP_PATH"
 $SUDO chmod -R 750 "$PICKUP_PATH"
 
@@ -53,4 +60,5 @@ echo "---------------------------------------------------------"
 echo "Host SFTP: <IP_DA_PKI>"
 echo "User: $SFTP_USER"
 echo "Path: $PICKUP_PATH"
-echo "Files: ${DOMAIN}.key, fullchain.crt"
+echo "Files: ${DOMAIN}.key, fullchain.crt, root.crt"
+echo "Nota: Se for a primeira vez, instala o root.crt no servidor/cliente."

@@ -1,4 +1,4 @@
-    #!/bin/bash
+#!/bin/bash
 # Publica um certificado de utilizador via SFTP (blind drop + auto-destruicao)
 # Uso: ./publish_user_sftp.sh "Nome User"
 
@@ -17,9 +17,15 @@ SAFE_NAME=$(echo "$RAW_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '_')
 USER_DIR="$ROOT_DIR/04_user_certs/$SAFE_NAME"
 USER_KEY="$USER_DIR/user.key"
 USER_CRT="$USER_DIR/user.crt"
+ROOT_CRT="$ROOT_DIR/01_root-ca/certs/root.crt"
 
 if [ ! -f "$USER_KEY" ] || [ ! -f "$USER_CRT" ]; then
     echo "Erro: certificado do user nao encontrado em $USER_DIR"
+    exit 1
+fi
+
+if [ ! -f "$ROOT_CRT" ]; then
+    echo "Erro: root.crt nao encontrado em $ROOT_CRT"
     exit 1
 fi
 
@@ -57,6 +63,7 @@ openssl pkcs12 -export \
 
 $SUDO mkdir -p "$PICKUP_PATH"
 $SUDO cp "$TMP_P12" "$PICKUP_PATH/"
+$SUDO cp "$ROOT_CRT" "$PICKUP_PATH/"
 $SUDO chown -R "$SFTP_USER":"$SFTP_USER" "$PICKUP_PATH"
 $SUDO chmod -R 750 "$PICKUP_PATH"
 
@@ -70,5 +77,6 @@ echo "---------------------------------------------------------"
 echo "Host SFTP: <IP_DA_PKI>"
 echo "User: $SFTP_USER"
 echo "Path: $PICKUP_PATH"
-echo "File: ${SAFE_NAME}_sftp.p12"
+echo "Files: ${SAFE_NAME}_sftp.p12, root.crt"
 echo "Password: $P12_PASS"
+echo "Nota: Se for a primeira vez, instala o root.crt no sistema/browsers."
